@@ -1,0 +1,4 @@
+1.Umbre si raze
+2.Ray casting
+3.Miscare
+

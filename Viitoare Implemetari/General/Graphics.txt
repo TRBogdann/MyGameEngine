@@ -1,0 +1,6 @@
+1.Redimensionare Ecran
+2.Texturi
+3.Camera
+4.Desenare si redesenare ecran
+
+

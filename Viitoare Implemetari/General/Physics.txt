@@ -1,0 +1,5 @@
+1.Gravitatie
+2.Viteza
+3.Ciocniri(elastice , plastice)
+4.Deformare
+5.Normala la Suprafata

@@ -1,0 +1,13 @@
+Done
+1.Vectori
+2.Matrice
+3.Cuaternioni
+
+Working on
+3.Transformari
+4.Matrice de rotatie
+5.Coordonate Obiecte
+6.Delta
+7.Distante
+8.Forme Geometrice
+9.Coliziuni . Detectarea coliziunilor

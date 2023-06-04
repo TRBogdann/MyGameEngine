@@ -1,0 +1,22 @@
+g++ -o  program program.cpp window.cpp  $(pkg-config --cflags --libs sdl2)
+
+
+g++ -o  program program.cpp graphic_engine/windows/window.cpp math_engine/math.cpp graphic_engine/colors/color.cpp graphic_engine/geometry/geometry.cpp $(pkg-config --cflags --libs sdl2)
+
+
+g++ -o program learning_pipeline.cpp -lGL -lGLU -lGLEW graphic_engine/windows/window.cpp math_engine/math.cpp graphic_engine/colors/color.cpp graphic_engine/geometry/geometry.cpp $(pkg-config --cflags --libs sdl2)
+
+g++ -o program learning_pipeline.cpp -lGL -lGLU -lGLEW $(pkg-config --cflags --libs sdl2)    graphic_engine/windows/window.cpp math_engine/math.cpp graphic_engine/colors/color.cpp graphic_engine/geometry/geometry.cpp graphic_engine/shaders/Shader.cpp graphic_engine/buffers/buffers.cpp
+
+
+Exemple compilare LinuxToWindows 
+
+a) Pt 64 biti
+ x86_64-w64-mingw32-gcc -o main64.exe main.c
+
+b) Pt 32 biti
+
+i686-w64-mingw32-gcc -o main32.exe main.c
+
+c) actual 
+x86_64-w64-mingw32-gcc -o learning_pipeline.cpp -lGL -lGLU -lGLEW graphic_engine/windows/window.cpp math_engine/math.cpp graphic_engine/colors/color.cpp graphic_engine/geometry/geometry.cpp $(pkg-config --cflags --libs sdl2)

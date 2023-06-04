@@ -1,0 +1,10 @@
+//Container errors
+
+#define ERR_CONTAINER_SIZE  1
+#define ERR_CONTAINER_OVERFLOW 2
+#define ERR_PUSH_INTO_NULL 3
+#define ERR_POP_NULL 4
+#define ERR_POP_EMPTY_ARRAY 5
+#define ERR_CONTAINER_RESIZE 6
+#define ERR_INVALID_SIZE 7
+#define ERR_INDEX_OUT_OF_BOUNDS 8
