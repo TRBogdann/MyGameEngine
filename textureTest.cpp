@@ -1,10 +1,4 @@
 #include "graphic_engine/PSBgraphics.h"
-#include "graphic_engine/colors/color.h"
-#include "graphic_engine/geometry/geometry.h"
-#include "graphic_engine/renderer/renderer.h"
-#include "graphic_engine/shaders/Shader.h"
-#include "graphic_engine/textures/texture.h"
-#include "graphic_engine/windows/window.h"
 #include "math_engine/PSBmath.h"
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_haptic.h>
@@ -27,14 +21,15 @@ int D_isPressed=0;
 int W_isPressed=0;
 int Space_isPressed=0;
 
+float ar=600.0f/800.0f;
 
 
 Math::vec2f Origin(float *vect)
 {
 Math::vec2f origin;
 
-float x=(vect[0]+vect[7]+vect[21]+vect[14])/4;
-float y=(vect[1]+vect[8]+vect[22]+vect[15])/4;
+float x=(vect[0]+vect[5]+vect[10]+vect[15])/4;
+float y=(vect[1]+vect[6]+vect[11]+vect[16])/4;
 
 origin.x=x;
 origin.y=y;
@@ -49,9 +44,9 @@ void rotate(float alpha, float *vect)
  
  for(int i=0;i<4;i++)
  { 
-  point=Math::rotationVec2f({vect[7*i]-origin.x,vect[7*i+1]-origin.y},alpha)+origin;
-  vect[7*i]=point.x;
-  vect[7*i+1]=point.y;
+  point=Math::rotationVec2f({vect[5*i]-origin.x,vect[5*i+1]-origin.y},alpha)+origin;
+  vect[5*i]=point.x;
+  vect[5*i+1]=point.y;
  }
 }
 
@@ -78,15 +73,17 @@ int main()
   
 
 Window window("My Window",800,600);
+glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+glEnable(GL_BLEND);
 SDL_Event event;
 //0A.VERTEX DATA (opengl foloseste coordonate normalizate)
 
 float vertexData2F[]=
 {
--0.5f, -0.5f,  0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 
- 0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 
--0.5f,  0.5f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
- 0.5f,  0.5f,  0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+-0.5f*ar, -0.5f,  0.0f,0.0f, 0.0f,
+ 0.5f*ar, -0.5f,  0.0f, 1.0f, 0.0f,
+-0.5f*ar,  0.5f,  0.0f, 0.0f, 1.0f,
+ 0.5f*ar,  0.5f,  0.0f, 1.0f, 1.0f
 
 };
 
@@ -100,26 +97,26 @@ unsigned int indexData[6]=
 };
 
 
-std::ifstream fs("graphic_engine/shaders/fragmentShader.shader");
-std::ifstream vs("graphic_engine/shaders/vertexShader.shader");
+std::ifstream fs("graphic_engine/shaders/textureFragShader.shader");
+std::ifstream vs("graphic_engine/shaders/textureVertShader.shader");
 std::string vertexShader=FileToString(vs);
 std::string fragmentShader=FileToString(fs);
 
 Shader MyShader(vertexShader,fragmentShader);
-VertexArray arr(7*sizeof(float));
-VertexBuffer vert(vertexData2F,28*sizeof(float));
+VertexArray arr(5*sizeof(float));
+VertexBuffer vert(vertexData2F,20*sizeof(float));
 IndexBuffer ind(indexData,6);
 graphicalAtribute atributes[2]=
 {
 {3,"Vertecies"},
-{4,"Color"}
+{2,"Texture"}
 };
 arr.addData(vert,atributes,2);
 MyShader.bind();
 //MyShader.setUniform4f("color",1.0f,0.0f,0.0f,1.0f);
-Texture texture("wall.jpeg",0);
+Texture texture("testTextures/wall.jpg",0);
+MyShader.setUniform1i("textureSampler",0);
 texture.bind();
-MyShader.setUniform1i("u_Texture",0);
 Renderer renderer;
 
 
@@ -134,13 +131,26 @@ while(!window.isClosed())
 {
     renderer.clear();
 
-VertexArray arr2(7*sizeof(float));
-VertexBuffer v2(vertexData2F,28*sizeof(float));
+VertexArray arr2(5*sizeof(float));
+VertexBuffer v2(vertexData2F,20*sizeof(float));
 arr2.addData(v2,atributes,2);
 
     window.pollEvents(event);
 
-
+  if(event.type==SDL_WINDOWEVENT)
+   if(event.window.event==SDL_WINDOWEVENT_RESIZED)
+     {
+      float oldAR=ar;
+      ar=window.getHeight()/window.getWidth();
+ vertexData2F[0]/=oldAR;
+ vertexData2F[0]*=ar;
+  vertexData2F[5]/=oldAR;
+ vertexData2F[5]*=ar;
+  vertexData2F[10]/=oldAR;
+ vertexData2F[10]*=ar;
+  vertexData2F[15]/=oldAR;
+ vertexData2F[15]*=ar;
+     }
 
   if(event.type==SDL_KEYDOWN)
     KeyDown(event);
@@ -151,41 +161,41 @@ arr2.addData(v2,atributes,2);
   {
    
  vertexData2F[0]-=0.001f;
- vertexData2F[7]-=0.001f;
- vertexData2F[14]-=0.001f;
- vertexData2F[21]-=0.001f;
+ vertexData2F[5]-=0.001f;
+ vertexData2F[10]-=0.001f;
+ vertexData2F[15]-=0.001f;
   }
 
     if(D_isPressed)
   {
    
  vertexData2F[0]+=0.001f;
- vertexData2F[7]+=0.001f;
- vertexData2F[14]+=0.001f;
- vertexData2F[21]+=0.001f;
+ vertexData2F[5]+=0.001f;
+ vertexData2F[10]+=0.001f;
+ vertexData2F[15]+=0.001f;
   }
 
     if(S_isPressed)
   {
    
  vertexData2F[1]-=0.001f;
- vertexData2F[8]-=0.001f;
- vertexData2F[15]-=0.001f;
- vertexData2F[22]-=0.001f;
+ vertexData2F[6]-=0.001f;
+ vertexData2F[11]-=0.001f;
+ vertexData2F[16]-=0.001f;
   }
 
     if(W_isPressed)
   {
    
  vertexData2F[1]+=0.001f;
- vertexData2F[8]+=0.001f;
- vertexData2F[15]+=0.001f;
- vertexData2F[22]+=0.001f;
+ vertexData2F[6]+=0.001f;
+ vertexData2F[11]+=0.001f;
+ vertexData2F[16]+=0.001f;
   }
 
   if(Space_isPressed)
   {
-    rotate(1.0f,vertexData2F);
+    rotate(0.2f,vertexData2F);
   }
     
     

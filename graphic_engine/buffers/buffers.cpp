@@ -4,6 +4,7 @@
 VertexBuffer::VertexBuffer(const void *data, unsigned int byteSize)
 {
 
+
     glGenBuffers(1,&rendererId);  
     glBindBuffer(GL_ARRAY_BUFFER,rendererId);
     glBufferData(GL_ARRAY_BUFFER,byteSize,data,GL_STATIC_DRAW); 
@@ -34,19 +35,21 @@ void VertexBuffer::unbind()
 
 
 IndexBuffer::IndexBuffer(const unsigned int *data, unsigned int elementCount)
-    :count(elementCount)
 {
-
+    
     glGenBuffers(2,&rendererId);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,rendererId); //buffer ul ales va fi utilizat 
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,elementCount*sizeof(unsigned int),data,GL_STATIC_DRAW);
-
+    count=elementCount;
+    
 }
 
+/*
 IndexBuffer::IndexBuffer(std::string fileName, unsigned int elementCount)
 {
 
 }
+*/
 
 IndexBuffer::~IndexBuffer()
 {

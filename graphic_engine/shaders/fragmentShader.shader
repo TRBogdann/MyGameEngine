@@ -2,7 +2,6 @@
 
 out vec4 FragColor;
 in vec4 ourColor;
-uniform vec4 u_Color;
 
 void main()
 {

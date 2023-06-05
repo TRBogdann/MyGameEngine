@@ -39,7 +39,7 @@ class IndexBuffer
 public:
 
 IndexBuffer(const unsigned int* data, unsigned int elementCount);
-IndexBuffer(std::string filename, unsigned int size);
+//IndexBuffer(std::string filename, unsigned int size);
 ~IndexBuffer();
 
 void bind();
