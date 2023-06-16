@@ -10,12 +10,14 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_video.h>
 #include <iostream>
+#include <string>
 #include <vector>
 #include <fstream>
 
 
 bool A_isPressed=0,W_isPressed=0,S_isPressed=0,D_isPressed=0;
 bool Left_isPressed=0,Right_isPressed=0;
+bool Space_isPressed=0;
 float oHeight=1024;
 float angle=0.07f;
 float distance=0.3f;
@@ -25,6 +27,19 @@ Math::vec2f b1(distance,0);
 Math::vec2f r1(0,-distance);
 Math::vec2f l1(0,+distance);
 
+class Gun
+{
+public:
+Gun(std::string path);
+~Gun();
+
+void draw();
+
+private:
+std::string image;
+float vert[20];
+float ind[6];
+};
 
 std::ifstream f("dots.txt");
 
@@ -100,6 +115,8 @@ if(event.key.keysym.sym==SDLK_LEFT)Left_isPressed=1;
 
 if(event.key.keysym.sym==SDLK_RIGHT)Right_isPressed=1;
 
+if(event.key.keysym.sym==SDLK_SPACE)Space_isPressed=1;
+
 }
 
 void KeyUp(SDL_Event &event)
@@ -115,6 +132,8 @@ if(event.key.keysym.sym==SDLK_d)D_isPressed=0;
 if(event.key.keysym.sym==SDLK_LEFT)Left_isPressed=0;
 
 if(event.key.keysym.sym==SDLK_RIGHT)Right_isPressed=0;
+
+if(event.key.keysym.sym==SDLK_SPACE)Space_isPressed=0;
 
 }
 
@@ -523,10 +542,24 @@ Shape::Rectangle shape(Math::vec2f(mx,my),w,h);
 shape.setFill(green);
 if(rays[i].type)shape.setFill(dark_green);
 
+if(i==90 && Space_isPressed)shape.setFill(orange);
+
 window.drawShape(shape);
 mx+=window.getWidth()/181.0f;
 }
 
+}
+
+void drawCrossHair(Window &window)
+{
+Shape::Rectangle leftCR(Math::vec2f(window.getWidth()/2,window.getHeight()/2),window.getWidth()/160,
+window.getHeight()/40);
+Shape::Rectangle rightCR(Math::vec2f(window.getWidth()/2,window.getHeight()/2),window.getWidth()/40,
+window.getHeight()/160);
+leftCR.setFill(red);
+rightCR.setFill(red);
+window.drawShape(leftCR);
+window.drawShape(rightCR);
 }
 
 void drawCeiling(Window &window)
@@ -562,6 +595,8 @@ for(int i=0;i<181;i++)
 Window window("My Window",1028,1028);
 SDL_Event event;
 
+glClearColor(1, 0, 0, 0);
+
 while(!window.isClosed())
 {
 
@@ -588,6 +623,7 @@ OnKeyPressed(player);
 //drawPlayer(player,window);
 
 
+
 for(int i=0;i<181;i++){
 Math::vec2f ray=finalRay(Hray(player,window,player.pov[i].x,player.pov[i].y,player.angle[i])
 ,Vray(player,window,player.pov[i].x,player.pov[i].y,player.angle[i]),player);
@@ -599,13 +635,13 @@ rays[i].type=type;
 
 drawCeiling(window);
 drawWalls(player,window);
+drawCrossHair(window);
 
 
 
 
 
-
-
+window.GLswap();
 window.clear();
 }
 

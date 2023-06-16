@@ -195,6 +195,7 @@ vec3f unitvec3f(const vec3f &v);
 vec2f unitvec2f(const vec2f &v);
 
 Math::Matrix ogProjection3f(Math::vec3f p,float angle, float d1, float d2,float  a);
+Math::Matrix persProjection3f(Math::vec3f p,float angle, float d1, float d2,float  a);
 void scalevec2f(Math::vec2f &p,float xSCALE_FACTOR, float ySCALE_FACTOR);
 
 

@@ -1066,7 +1066,29 @@ Math::Matrix(4,4,
 {a*(1/tanf(angle/2)) , 0.0f, 0.0f , 0.0f,
            0.0f, 1/tanf(angle/2), 0.0f , 0.0f,
            0.0f, 0.0f, d2/d, 1.0f,
-           0.0f, 0.0f , -d1*(d2/d),0.0f
+           0.0f, 0.0f , -d2*(d1/d),0.0f
+
+
+
+})/z
+
+)
+
+;
+};
+
+Math::Matrix persProjection3f(Math::vec3f p,float angle, float d1, float d2,float  a)
+{
+float d=d2-d1;
+float z=p.z;
+angle=Math::degreesToRad(angle);
+if(z==0)z=1;
+return (Math::Matrix(1,4,{p.x,p.y,p.z,1.0f})*
+Math::Matrix(4,4,
+{a/(tanf(angle/2)) , 0.0f, 0.0f , 0.0f,
+           0.0f, 1/tanf(angle/2), 0.0f , 0.0f,
+           0.0f, 0.0f, (-d1-d2)/d, (-2*d1*d2)/d,
+           0.0f, 0.0f , -1.0f,0.0f
 
 
 

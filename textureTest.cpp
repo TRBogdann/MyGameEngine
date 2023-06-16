@@ -1,4 +1,5 @@
 #include "graphic_engine/PSBgraphics.h"
+#include "graphic_engine/geometry/geometry.h"
 #include "math_engine/PSBmath.h"
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_haptic.h>
@@ -22,6 +23,7 @@ int W_isPressed=0;
 int Space_isPressed=0;
 
 float ar=600.0f/800.0f;
+
 
 
 Math::vec2f Origin(float *vect)
@@ -89,6 +91,7 @@ float vertexData2F[]=
 
 
 
+
 //0B.INDEX DATA (Ordinera desenarii punctelor)
 unsigned int indexData[6]=
 {
@@ -96,25 +99,28 @@ unsigned int indexData[6]=
 2,3,1
 };
 
+Shape::Rectangle rec(Math::vec2f(window.getWidth()/2,window.getHeight()/2),100.0f,100.0f);
+rec.setFill(blue);
 
 std::ifstream fs("graphic_engine/shaders/textureFragShader.shader");
 std::ifstream vs("graphic_engine/shaders/textureVertShader.shader");
 std::string vertexShader=FileToString(vs);
 std::string fragmentShader=FileToString(fs);
 
-Shader MyShader(vertexShader,fragmentShader);
-VertexArray arr(5*sizeof(float));
-VertexBuffer vert(vertexData2F,20*sizeof(float));
-IndexBuffer ind(indexData,6);
 graphicalAtribute atributes[2]=
 {
 {3,"Vertecies"},
 {2,"Texture"}
 };
+Shader MyShader(vertexShader,fragmentShader);
+VertexArray arr(5*sizeof(float));
+arr.bind();
+VertexBuffer vert(vertexData2F,20*sizeof(float));
 arr.addData(vert,atributes,2);
+IndexBuffer ind(indexData,6);
 MyShader.bind();
 //MyShader.setUniform4f("color",1.0f,0.0f,0.0f,1.0f);
-Texture texture("testTextures/wall.jpg",0);
+Texture texture("testTextures/wall2k.jpg",0);
 MyShader.setUniform1i("textureSampler",0);
 texture.bind();
 Renderer renderer;
@@ -128,8 +134,10 @@ Renderer renderer;
 glClearColor(0.0f,0.3f,0.3f,0.0f);
 
 while(!window.isClosed())
-{
+{  
+
     renderer.clear();
+
 
 VertexArray arr2(5*sizeof(float));
 VertexBuffer v2(vertexData2F,20*sizeof(float));
@@ -140,16 +148,6 @@ arr2.addData(v2,atributes,2);
   if(event.type==SDL_WINDOWEVENT)
    if(event.window.event==SDL_WINDOWEVENT_RESIZED)
      {
-      float oldAR=ar;
-      ar=window.getHeight()/window.getWidth();
- vertexData2F[0]/=oldAR;
- vertexData2F[0]*=ar;
-  vertexData2F[5]/=oldAR;
- vertexData2F[5]*=ar;
-  vertexData2F[10]/=oldAR;
- vertexData2F[10]*=ar;
-  vertexData2F[15]/=oldAR;
- vertexData2F[15]*=ar;
      }
 
   if(event.type==SDL_KEYDOWN)
@@ -207,7 +205,7 @@ arr2.addData(v2,atributes,2);
 
 
     renderer.drawType1(arr,ind,MyShader);
- 
+    window.drawShape(rec);
     window.GLswap();
    
 

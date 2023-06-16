@@ -7,7 +7,7 @@ class Texture
 {
 
 public:
-    Texture(const std::string filename,bool keepLocalData);  
+    Texture(const std::string filename,bool keepLocalData,bool useOpacity=0);  
     ~Texture();
 
     void bind(unsigned int slot=0);
@@ -17,6 +17,9 @@ public:
     int getHeight();
     int getDensity();
 
+    void enableOpacity();
+    void disableOpacity();
+
 private:
     unsigned int rendererId;
     std::string filePath;
@@ -24,4 +27,5 @@ private:
     int width;
     int height;
     int density;
+    bool opacity;
 };
