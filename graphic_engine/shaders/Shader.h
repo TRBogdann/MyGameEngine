@@ -36,3 +36,7 @@ std::string _vertexShader;
 
 std::string FileToString(const std::ifstream &file);
 
+Shader* ColShader();
+Shader* TexShader();
+
+

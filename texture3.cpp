@@ -1,5 +1,8 @@
 #include "graphic_engine/PSBgraphics.h"
+#include "graphic_engine/buffers/buffers.h"
 #include "graphic_engine/renderer/renderer.h"
+#include "graphic_engine/shaders/Shader.h"
+#include "graphic_engine/textures/texture.h"
 #include "math_engine/PSBmath.h"
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_haptic.h>
@@ -27,36 +30,6 @@ float d1=0.01f;
 float d2=1000.0f;
 float angle=90.0f;
 
-struct Quad
-{
-float indexBuffer[6];
-float vertexBuffer[20];
-Math::vec2f surfaceNormal;
-};
-
-Quad createQuad(std::string indexBuffer, std::string vertexBuffer,Math::vec2f surfaceNormal)
-{
-Quad quad;
-
-std::ifstream index(indexBuffer);
-std::ifstream vert(vertexBuffer);
-
-quad.surfaceNormal=surfaceNormal;
-
-for(int i=0;i<6;i++)
-{
-  vert>>quad.indexBuffer[i];
-}
-
-for(int i=0;i<20;i++)
-{
-  vert>>quad.vertexBuffer[i];
-}
-
-return quad;
-}
-
-
 
 
 
@@ -70,24 +43,20 @@ point.y=(1-2*point.y);
 return {point.x,point.y,point.z};
 }
 
-
-
-
-int main()
-{
-  
-
-Window window("My Window",800,600);
-glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-glEnable(GL_BLEND);
-SDL_Event event;
-//0A.VERTEX DATA (opengl foloseste coordonate normalizate)
-
 float vertexData2F[]=
 {
 -0.25f, -0.25f*a,  1.0f,0.0f, 0.0f, 
  0.5f, -0.5f*a,  1.0f, 1.0f, 0.0f, 
 -0.25f,  0.25f*a,  1.0f, 0.0f, 1.0f, 
+ 0.5f,  0.5f*a,  1.0f, 1.0f, 1.0f 
+
+};
+
+float v2[]=
+{
+-0.5f, -0.5f*a,  1.0f,0.0f, 0.0f, 
+ 0.5f, -0.5f*a,  1.0f, 1.0f, 0.0f, 
+-0.5f,  0.5f*a,  1.0f, 0.0f, 1.0f, 
  0.5f,  0.5f*a,  1.0f, 1.0f, 1.0f 
 
 };
@@ -104,6 +73,7 @@ float square2[]=
 
 
 
+
 //0B.INDEX DATA (Ordinera desenarii punctelor)
 unsigned int indexData[6]=
 {
@@ -111,44 +81,100 @@ unsigned int indexData[6]=
 2,3,1
 };
 
-class obj
+class Pencil1
 {
 public:
-obj(float *buffer , unsigned int  *index, Shader _shader, std::string texturePath)
+Pencil1()
 {
-shader=&_shader;
-arr=new VertexArray(5*sizeof(float));
+isEmpty=1;
+}
+Pencil1(float *vertD)
+{
+isEmpty=0;
+graphicalAtribute *atributes=TexAtrib();
+shader=TexShader();
+arr=new VertexArray((5*sizeof(float)));
 arr->bind();
-vert=new VertexBuffer(buffer,20*sizeof(float));
-graphicalAtribute atributes[2]=
+buff=new VertexBuffer(vertD,20*sizeof(float));
+arr->addData(*buff,atributes,2);
+ind=new IndexBuffer(indexData,6);
+shader->bind();
+texture=new Texture("testTextures/wall2k.jpg",0);
+shader->setUniform1i("textureSampler",0);
+texture->bind();
+};
+
+void change(float *vertD)
+{
+graphicalAtribute *atributes=TexAtrib();
+buff->unbind();
+delete buff;
+buff=new VertexBuffer(vertD,20*sizeof(float));
+arr->addData(*buff,atributes,2);
+}
+
+~Pencil1()
+{
+
+arr->unbind();
+buff->unbind();
+ind->unbind();
+shader->unbind();
+texture->unbind(); 
+
+delete arr;
+delete buff;
+delete ind;
+delete shader;
+delete texture;
+
+}
+
+void refresh()
+{
+  VertexBuffer *buff1=new VertexBuffer(vertexData2F,20*sizeof(float));
+  graphicalAtribute atributes[2]=
 {
 {3,"Vertecies"},
 {2,"Texture"}
 };
-ind=new IndexBuffer(index,6);
-arr->addData(*vert,atributes,2);
-shader->bind();
-//MyShader.setUniform4f("color",1.0f,0.0f,0.0f,1.0f);
-texture=new Texture(texturePath,0);
-shader->setUniform1i("textureSampler",0);
-texture->bind();
+  arr->addData(*buff1,atributes,2);
 }
 
-~obj()
+void clear()
 {
-  delete [] vert;
-  delete [] ind;
-  delete [] arr;
+    renderer.clear();
 }
-void draw(Renderer renderer);
+
+void draw()
+{
+    renderer.drawType1(*arr,*ind,*shader);
+}
+
 private:
-VertexBuffer *vert;
-IndexBuffer *ind;
-VertexArray *arr;
-Texture *texture;
 Shader *shader;
+VertexArray *arr;
+VertexBuffer *buff;
+IndexBuffer *ind;
+Texture *texture;
+Renderer renderer;
+bool isEmpty;
 };
 
+
+int main()
+{
+  
+
+Window window("My Window",800,600);
+glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+glEnable(GL_BLEND);
+SDL_Event event;
+
+Pencil1 pen(v2);
+
+
+/*
 std::ifstream fs("graphic_engine/shaders/textureFragShader.shader");
 std::ifstream vs("graphic_engine/shaders/textureVertShader.shader");
 std::string vertexShader=FileToString(vs);
@@ -174,31 +200,27 @@ Renderer renderer;
 
 
 
-
+*/
 
 glClearColor(0.0f,0.3f,0.3f,0.0f);
 
 
 while(!window.isClosed())
 {
-  renderer.clear();
+  pen.clear();
 
+
+
+
+ 
 
   
     window.pollEvents(event);
 
 
-
-
-
-    
-    
-    
-
-
   glViewport(0,0,window.getWidth(),window.getHeight());
 
-    renderer.drawType1(arr,ind,MyShader);
+  pen.draw();
 
 
         window.GLswap();

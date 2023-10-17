@@ -5,5 +5,7 @@
 #include "GL/glew.h"
 #include "renderer/renderer.h"
 #include "textures/texture.h"
+#include "transformations/transformations.h"
+#include "pencil/pencil.h"
 
  

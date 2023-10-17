@@ -1,4 +1,4 @@
-
+#pragma once
 #include <GL/glew.h>
 #include <iostream>
 
@@ -9,6 +9,8 @@ nr elemente
 marime data
 */
 
+
+
 struct graphicalAtribute
 {
 
@@ -16,6 +18,9 @@ unsigned int size;
 std::string name;
 
 };
+
+graphicalAtribute* ColAtrib();
+graphicalAtribute* TexAtrib();
 
 class VertexBuffer
 {
@@ -25,6 +30,7 @@ VertexBuffer(const void* data, unsigned int byteSize);
 VertexBuffer(std::string filename, unsigned int byteSize);
 ~VertexBuffer();
 
+void update(const void *data,unsigned int byteSize,unsigned int offset=0);
 void bind();
 void unbind();
 

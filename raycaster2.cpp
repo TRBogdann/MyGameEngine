@@ -1,6 +1,12 @@
 #include "graphic_engine/PSBgraphics.h"
+#include "graphic_engine/buffers/buffers.h"
 #include "graphic_engine/colors/color.h"
 #include "graphic_engine/geometry/geometry.h"
+#include "graphic_engine/geometry/geometry2.h"
+#include "graphic_engine/renderer/renderer.h"
+#include "graphic_engine/shaders/Shader.h"
+
+#include "graphic_engine/textures/texture.h"
 #include "graphic_engine/windows/window.h"
 #include "math_engine/PSBmath.h"
 #include <SDL2/SDL_events.h>
@@ -15,12 +21,167 @@
 #include <fstream>
 
 
+struct texMap{
+    texMap *next;
+    texMap *prev;
+    Math::vec2f p1,p2;
+};
+
+texMap *newTextureMap(float growth)
+{
+    texMap *first= new texMap;
+    first->p1={0.0f,0.0f};
+    first->p2={0.0f,1.0f};
+
+    texMap *k=new texMap;
+    k->p1=first->p1+Math::vec2f{growth,0};
+    k->p2=first->p2+Math::vec2f{growth,0};
+
+    k->prev=first;
+    first->next=k;
+
+    while(k->p1.x+growth<1)
+    {
+        texMap *z=new texMap;
+        z->p1=k->p1+Math::vec2f{growth,0};
+        z->p2=k->p2+Math::vec2f{growth,0};
+
+        z->prev=k;
+        k->next=z;
+        k=k->next;
+    }
+     texMap *z=new texMap;
+      z->p1=Math::vec2f{1.0f,0.0};
+      z->p2=Math::vec2f{1.0f,1.0f};
+
+      z->prev=k;
+      k->next=z;
+      k=k->next;
+      k->next=first;
+      first->prev=k;
+
+    return first;
+}
+
+void rotateTex(int rotations,texMap *map)
+{
+    for(int i=0;i<rotations;i++)
+      map=map->next;
+}
+
+texMap *wallMap=newTextureMap(0.00555555555f);
+float secureRot=0.0f;
+float secureMov=0.0f;
+
+
+graphicalAtribute *atrib=TexAtrib();
+
+
+    unsigned int indexData[6]=
+{
+0,2,1,
+2,3,1
+};
+
+class Textured_Rectangle
+{
+    public:
+    Math::vec2f coord[4];
+    Math::vec2f texCoord[4];
+    Math::vec2f origin;
+    Math::vec2f position;
+  
+    Textured_Rectangle(Math::vec2f _position,float width, float height):
+    position(_position),origin(_position)
+    {
+
+
+        
+    coord[0]=position+Math::vec2f({-width/2.0f,height/2.0f});
+    coord[1]=position+Math::vec2f({-width/2.0f,-height/2.0f});
+    coord[2]=position+Math::vec2f({width/2.0f,height/2.0f});
+    coord[3]=position+Math::vec2f({width/2.0f,-height/2.0f});
+
+    texCoord[0]={0.0f,0.0f};
+    texCoord[2]={1.0f,0.0f};
+    texCoord[1]={0.0f,1.0f};
+    texCoord[3]={1.0f, 1.0f};
+
+/*
+    Math::vec3f normal[4] = {
+        utils::convertToGlCoords({coord[0].x, coord[0].y, 0.0f},
+                                 window.getWidth(), window.getHeight()),
+        utils::convertToGlCoords({coord[1].x, coord[1].y, 0.0f},
+                                 window.getWidth(), window.getHeight()),
+        utils::convertToGlCoords({coord[2].x, coord[2].y, 0.0f},
+                                 window.getWidth(), window.getHeight()),
+        utils::convertToGlCoords({coord[3].x, coord[3].y, 0.0f},
+                                 window.getWidth(), window.getHeight()),
+    };
+
+float data[]
+{
+    normal[0].x,normal[0].y,1.0f,texCoord[0].x,texCoord[0].y,
+    normal[1].x,normal[1].y,1.0f,texCoord[1].x,texCoord[1].y,
+    normal[2].x,normal[2].y,1.0f,texCoord[2].x,texCoord[2].y,
+    normal[3].x,normal[3].y,1.0f,texCoord[3].x,texCoord[3].y
+};
+*/
+
+
+
+    };
+
+  void copyToBuffer(VertexBuffer &buff,float width,float height)
+{
+  
+    Math::vec3f normal[4] = {
+        utils::convertToGlCoords({coord[0].x, coord[0].y, 0.0f},
+                                 width, height),
+        utils::convertToGlCoords({coord[1].x, coord[1].y, 0.0f},
+                                 width, height),
+        utils::convertToGlCoords({coord[2].x, coord[2].y, 0.0f},
+                                 width, height),
+        utils::convertToGlCoords({coord[3].x, coord[3].y, 0.0f},
+                                 width, height),
+    };
+
+float data[]
+{
+    normal[0].x,normal[0].y,1.0f,texCoord[0].x,texCoord[0].y,
+    normal[1].x,normal[1].y,1.0f,texCoord[1].x,texCoord[1].y,
+    normal[2].x,normal[2].y,1.0f,texCoord[2].x,texCoord[2].y,
+    normal[3].x,normal[3].y,1.0f,texCoord[3].x,texCoord[3].y
+};
+
+buff.update(data,20*sizeof(float));
+};
+
+/*
+void draw(Renderer &renderer,Shader *shader)
+{
+
+
+}
+*/
+
+
+    private:
+
+   
+
+};
+ 
+
+
+
+
 bool A_isPressed=0,W_isPressed=0,S_isPressed=0,D_isPressed=0;
 bool Left_isPressed=0,Right_isPressed=0;
 bool Space_isPressed=0;
 float oHeight=1024;
-float angle=0.07f;
-float distance=0.3f;
+float angle=0.1f;
+float distance=0.1f;
 bool type;
 Math::vec2f f1(-distance,0);
 Math::vec2f b1(distance,0);
@@ -147,8 +308,13 @@ if(A_isPressed)
   player.y+=l1.y;
   for(int i=0;i<181;i++)
   {
-    player.pov[i].x+=l1.x;
+  player.pov[i].x+=l1.x;
   player.pov[i].y+=l1.y;
+  }
+  secureMov-=distance;
+  if(secureMov<0.0f){
+  wallMap=wallMap->prev;
+  secureMov=2.599999f;
   }
 }
 
@@ -162,6 +328,11 @@ if(D_isPressed)
   player.pov[i].x+=r1.x;
   player.pov[i].y+=r1.y;
   }
+  secureMov+=distance;
+  if(secureMov>2.6f){
+  wallMap=wallMap->next;
+  secureMov=0.0001f;
+  }
 }
 
 if(S_isPressed)
@@ -174,6 +345,7 @@ if(S_isPressed)
   player.pov[i].x+=b1.x;
   player.pov[i].y+=b1.y;
   }
+
 }
 
 if(W_isPressed)
@@ -203,12 +375,16 @@ for(int i=0;i<181;i++){
 Math::vec2f camera(player.pov[i].x,player.pov[i].y);
 camera=Math::rotationVec2f(camera-origin, -angle)+origin;
 player.angle[i]-=angle;
+secureRot-=angle;
 if(player.angle[i]<0.0f)player.angle[i]=359.99f;
 player.pov[i].x=camera.x;
 player.pov[i].y=camera.y;
 
 }
-
+if(secureRot<0.0f){
+wallMap=wallMap->prev;
+secureRot=89.99999f;
+}
 
 }
 
@@ -226,13 +402,18 @@ for(int i=0;i<181;i++){
 Math::vec2f camera(player.pov[i].x,player.pov[i].y);
 
 camera=Math::rotationVec2f(camera-origin, angle)+origin;
-
+secureRot+=angle;
 player.angle[i]+=angle;
 if(player.angle[i]>360.0f)player.angle[i]=0.01f;
 player.pov[i].x=camera.x;
 player.pov[i].y=camera.y;
   }
+if(secureRot>90.0f){
+wallMap=wallMap->next;
+secureRot=0.00001f;
 }
+}
+
 
 }
 
@@ -489,8 +670,10 @@ void drawRay(float x,float y,Player& player, Window &window)
 window.drawline(player.x,player.y,x,y,orange);
 }
 
-void drawWalls(Player &player, Window &window)
+void drawWalls(Player &player, Window &window,Renderer renderer,Shader *shader,VertexBuffer &buff, VertexArray &arr, IndexBuffer &ind)
 {
+texMap *map=wallMap;
+
 float mx=(window.getWidth()/181.0f)/2.0f;
 float my=window.getHeight()/2;
 float w=window.getWidth()/181.0f;
@@ -537,43 +720,79 @@ dis*=0.025f;
 if(dis<1)dis=1;
 
 h=window.getHeight()/dis;
-Shape::Rectangle shape(Math::vec2f(mx,my),w,h);
-
+/*
+Shape2::Rectangle shape(Math::vec2f(mx,my),w,h);
+shape.setTexture("testTextures/wall.jpeg");
+shape.setRenderMode(TEXTURE_MODE);
 shape.setFill(green);
 if(rays[i].type)shape.setFill(dark_green);
 
 if(i==90 && Space_isPressed)shape.setFill(orange);
+*/
 
-window.drawShape(shape);
+
+Textured_Rectangle shape(Math::vec2f(mx,my),w,h);
+shape.texCoord[0]=map->p1;
+shape.texCoord[1]=map->p2;
+shape.texCoord[2]=map->next->p1;
+shape.texCoord[3]=map->next->p2;
+shape.copyToBuffer(buff,window.getWidth(),window.getHeight());
+renderer.drawType1(arr, ind, *shader);
+
 mx+=window.getWidth()/181.0f;
+map=map->next;
 }
 
 }
 
-void drawCrossHair(Window &window)
+void drawCrossHair(Window &window, Pencil &pencil)
 {
-Shape::Rectangle leftCR(Math::vec2f(window.getWidth()/2,window.getHeight()/2),window.getWidth()/160,
+Shape2::Rectangle leftCR(Math::vec2f(window.getWidth()/2,window.getHeight()/2),window.getWidth()/160,
 window.getHeight()/40);
-Shape::Rectangle rightCR(Math::vec2f(window.getWidth()/2,window.getHeight()/2),window.getWidth()/40,
+Shape2::Rectangle rightCR(Math::vec2f(window.getWidth()/2,window.getHeight()/2),window.getWidth()/40,
 window.getHeight()/160);
 leftCR.setFill(red);
 rightCR.setFill(red);
-window.drawShape(leftCR);
-window.drawShape(rightCR);
+pencil.draw(leftCR);
+pencil.draw(rightCR);
 }
 
-void drawCeiling(Window &window)
+void drawCeiling(Window &window, Pencil &pencil)
 {
-Shape::Rectangle ceiling(Math::vec2f(window.getWidth()/2,window.getHeight()/4)
+Shape2::Rectangle ceiling(Math::vec2f(window.getWidth()/2,window.getHeight()/4)
 ,window.getWidth(),window.getHeight()/2);
 
+ceiling.setFill(blue);
 
-window.drawShape(ceiling);
+pencil.draw(ceiling);
+}
+
+void drawFloor(Window &window,Renderer renderer,Shader *shader,VertexArray arr, VertexBuffer buff, IndexBuffer ind )
+{
+
+  Textured_Rectangle floor(Math::vec2f(window.getWidth()/2,window.getHeight()/2)
+,window.getWidth(),window.getHeight()/2);
+
+//floor.copyToBuffer(buff,window);
+
+/*
+Shape2::Rectangle ceiling(Math::vec2f(window.getWidth()/2,window.getHeight()/4*3)
+,window.getWidth(),window.getHeight()/2);
+ceiling.setTexture("testTextures/rock.avif");
+*/
+
+
+renderer.drawType1(arr, ind, *shader);
+
 }
 
 
 int main(int argc, char **argv)
 {
+ 
+
+
+
   player.color=yellow;
   player.x=400.0f;
   player.y=300.0f;
@@ -593,12 +812,43 @@ for(int i=0;i<181;i++)
 }
 
 Window window("My Window",1028,1028);
-SDL_Event event;
+rotateTex(40,wallMap);
 
-glClearColor(1, 0, 0, 0);
+glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+glEnable(GL_BLEND);
+SDL_Event event;
+Renderer renderer;
+
+Textured_Rectangle floor(Math::vec2f(window.getWidth()/2,window.getHeight()/4*3)
+,window.getWidth(),window.getHeight()/1.1);
+
+Textured_Rectangle gun(Math::vec2f(window.getWidth()/2.5,400.0f),400.0f,400.0f);
+
+Texture textureGun("testTextures/gun.png",0,1);
+Texture textureFloor("testTextures/concrete.jpg",0);
+Texture textureWall("testTextures/doomwall.jpg",0);
+
+graphicalAtribute *atributes=TexAtrib();
+Shader *shader=TexShader();
+VertexArray arr((5*sizeof(float)));
+arr.bind();
+VertexBuffer buff(0,20*sizeof(float));
+floor.copyToBuffer(buff, 800,600);
+arr.addData(buff,atributes,2);
+IndexBuffer ind(indexData,6);
+shader->bind();
+shader->setUniform1i("textureSampler",0);
+textureFloor.bind();
+
+
+
+glClearColor(0, 0, 1, 0);
 
 while(!window.isClosed())
 {
+
+    renderer.clear();
+    glViewport(0,0,window.getWidth(),window.getHeight());
 
 
 
@@ -618,31 +868,42 @@ if(event.type==SDL_KEYUP)
 
 OnKeyPressed(player);
 
-drawMap(mapMatrix,window);
-drawSectors(window);
-drawPlayer(player,window);
+//drawMap(mapMatrix,window);
+//drawSectors(window);
+//drawPlayer(player,window);
 
 
 
 for(int i=0;i<181;i++){
 Math::vec2f ray=finalRay(Hray(player,window,player.pov[i].x,player.pov[i].y,player.angle[i])
 ,Vray(player,window,player.pov[i].x,player.pov[i].y,player.angle[i]),player);
-drawRay(ray.x, ray.y, player, window);
+//zdrawRay(ray.x, ray.y, player, window);
 rays[i].x=ray.x;
 rays[i].y=ray.y;
 rays[i].type=type;
 }
 
-//drawCeiling(window);
-//drawWalls(player,window);
-//drawCrossHair(window);
+floor.copyToBuffer(buff, 800,600);
+textureFloor.bind();
+renderer.drawType1(arr,ind,*shader);
 
 
+//floorTex.bind();
+//drawFloor(window,renderer,shader,arr,buff,ind);
+
+//drawCeiling(window,renderer);
+textureWall.bind();
+drawWalls(player,window,renderer,shader,buff,arr,ind);
+//drawCrossHair(window,renderer);
+
+
+textureGun.bind();
+gun.copyToBuffer(buff,800,600);
+renderer.drawType1(arr,ind,*shader);
 
 
 
 window.GLswap();
-window.clear();
 }
 
   return 0;

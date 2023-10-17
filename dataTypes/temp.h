@@ -11,6 +11,7 @@ class Temp
 {
 public:
 
+Temp(long size);
 Temp(std::string fileName,long size);
 Temp(type *elements,long size);
 ~Temp();
@@ -41,6 +42,13 @@ data[i]=element;
 }
 
 }
+
+template <class type>
+Temp<type>::Temp(long size)
+{
+_size=size;
+data=new type[size];
+};
 
 template <class type>
 Temp<type>::Temp(type *elements,long size)

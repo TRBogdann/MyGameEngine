@@ -7,13 +7,19 @@ VertexBuffer::VertexBuffer(const void *data, unsigned int byteSize)
 
     glGenBuffers(1,&rendererId);  
     glBindBuffer(GL_ARRAY_BUFFER,rendererId);
-    glBufferData(GL_ARRAY_BUFFER,byteSize,data,GL_STATIC_DRAW); 
+    glBufferData(GL_ARRAY_BUFFER,byteSize,data,GL_DYNAMIC_DRAW); 
 
 }
 
 VertexBuffer::VertexBuffer(std::string fileName, unsigned int byteSize)
 {
 
+}
+
+void VertexBuffer::update(const void *data,unsigned int byteSize,unsigned int offset)
+{
+    glBindBuffer(GL_ARRAY_BUFFER,rendererId);
+    glBufferSubData(GL_ARRAY_BUFFER,offset,byteSize,data);
 }
 
 VertexBuffer::~VertexBuffer()
@@ -110,3 +116,31 @@ void VertexArray::addData(VertexBuffer &buffer, graphicalAtribute *atributes, un
     }
 }
 
+graphicalAtribute* ColAtrib()
+{
+graphicalAtribute *atrib=new graphicalAtribute[2];
+
+atrib[0].name="Vertecies";
+atrib[0].size=3;
+
+atrib[1].name="Color";
+atrib[1].size=4;
+
+return atrib;
+
+};
+
+graphicalAtribute* TexAtrib()
+{
+    
+graphicalAtribute *atrib=new graphicalAtribute[2];
+
+atrib[0].name="Vertecies";
+atrib[0].size=3;
+
+atrib[1].name="Tex";
+atrib[1].size=2;
+
+return atrib;
+
+};

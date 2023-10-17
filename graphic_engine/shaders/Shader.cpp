@@ -2,7 +2,7 @@
 #include "Shader.h"
 #include <iostream>
 #include <sstream>
-//III(B)  VERTEX SHADER && FRAGMENT SHADER
+
 
 
  std::string FileToString(const std::ifstream &file)
@@ -112,6 +112,29 @@ unsigned int Shader::findUniform(std::string name)
 
 }
 
+Shader* ColShader()
+{
 
+std::string vertexShader=" #version 450 core \n layout(location = 0) in vec4 aPos; \n layout (location = 1) in vec4 aColor; \n out vec4 ourColor; \n void main() \n { \n  gl_Position = aPos; \n ourColor = aColor; \n } ";
+std::string fragmentShader=" #version 450 core \n out vec4 FragColor; \n in vec4 ourColor; \n void main() \n { \n FragColor = ourColor; \n } ";
+
+Shader *sh = new Shader(vertexShader,fragmentShader);
+
+return sh;
+
+}
+
+Shader* TexShader()
+{
+  
+
+std::string vertexShader=" #version 450 core \n layout(location = 0)  in vec4 aPos; \n  layout (location = 1) in vec2 texCoord; \n out vec2 fragTexCoord;\n void main()\n { \n gl_Position = aPos; \n fragTexCoord = texCoord; \n } ";
+std::string fragmentShader=" #version 450 core \n uniform sampler2D textureSampler;\n in vec2 fragTexCoord; \n out vec4 FragColor; \n void main() \n { \n FragColor = texture(textureSampler, fragTexCoord); \n } ";
+
+Shader *sh = new Shader(vertexShader,fragmentShader);
+
+return sh;
+
+}
 
 
